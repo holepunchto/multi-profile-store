@@ -1,0 +1,40 @@
+{
+  "name": "multi-identity-store",
+  "version": "0.0.0",
+  "description": "Manage multiple corestores easily in a multi profile setup",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "bare-fs": "^4.4.4",
+    "bare-path": "^3.0.0",
+    "which-runtime": "^1.3.2"
+  },
+  "devDependencies": {
+    "standard": "^17.1.2"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "imports": {
+    "fs": {
+      "bare": "bare-fs",
+      "default": "fs"
+    },
+    "path": {
+      "bare": "bare-path",
+      "default": "path"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holepunchto/multi-identity-store.git"
+  },
+  "author": "Holepunch Inc.",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holepunchto/multi-identity-store/issues"
+  },
+  "homepage": "https://github.com/holepunchto/multi-identity-store"
+}
