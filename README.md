@@ -13,8 +13,11 @@ Note that all io is sync for simplicity.
 ``` js
 const MultiProfileStore = require('multi-profile-store')
 
+// open one
 const p = MultiProfileStore.open('./profiles')
 
+// if you might have made a single corestore first and want to move to this setup, use migrate
+const p = MultiProfileStore.migrate('./profiles')
 
 // active profile, ie { id, name, storage } or null
 p.active()
