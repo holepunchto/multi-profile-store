@@ -69,7 +69,7 @@ module.exports = class MultiProfileStore {
       if (delay && p.removed + delay > Date.now()) continue
       this._gc.splice(i--, 1)
       try {
-        fs.rmSync(p.storage)
+        fs.rmSync(p.storage, { recursive: true, force: true })
       } catch {}
       this.sync()
     }
@@ -85,23 +85,31 @@ module.exports = class MultiProfileStore {
   update ({ id, active = true }) {
     for (const p of this._profiles) {
       if (p.id === id) {
+        if (active) this._markAllInactive()
         p.active = active
         this.sync()
         return p
       }
     }
+
     return null
+  }
+
+  _markAllInactive () {
+    for (const p of this._profiles) {
+      p.active = false
+    }
   }
 
   _next () {
     let id = 0
 
     for (const p of this._profiles) {
-      id = Math.max(p.id + 1)
+      id = Math.max(id, p.id + 1)
     }
 
     for (const p of this._gc) {
-      id = Math.max(p.id + 1)
+      id = Math.max(id, p.id + 1)
     }
 
     return id
@@ -113,10 +121,12 @@ module.exports = class MultiProfileStore {
     const p = {
       id,
       name,
+      active,
       created,
       storage: path.join(this.directory, id + '')
     }
 
+    if (active) this._markAllInactive()
     this._profiles.push(p)
     this.sync()
     return p
@@ -182,7 +192,7 @@ module.exports = class MultiProfileStore {
     const p = MultiProfileStore.open(dir)
     if (p.active()) return p
 
-    if (fs.existsSync(path.join(dir, 'CORESTORE') && !fs.existsSync(path.join(dir, '0/CORESTORE')))) {
+    if (fs.existsSync(path.join(dir, 'CORESTORE')) && !fs.existsSync(path.join(dir, '0/CORESTORE'))) {
       if (!fs.existsSync(path.join(dir, '0'))) {
         fs.mkdirSync(path.join(dir, '0'))
       }
