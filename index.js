@@ -188,21 +188,21 @@ module.exports = class MultiProfileStore {
     return new MultiProfileStore(dir, config)
   }
 
-  static migrate (dir) {
-    const p = MultiProfileStore.open(dir)
+  static migrate (source, destination) {
+    const p = MultiProfileStore.open(destination)
     if (p.active()) return p
 
-    if (fs.existsSync(path.join(dir, 'CORESTORE')) && !fs.existsSync(path.join(dir, '0/CORESTORE'))) {
-      if (!fs.existsSync(path.join(dir, '0'))) {
-        fs.mkdirSync(path.join(dir, '0'))
+    if (fs.existsSync(path.join(source, 'CORESTORE')) && !fs.existsSync(path.join(destination, '0/CORESTORE'))) {
+      if (!fs.existsSync(path.join(destination, '0'))) {
+        fs.mkdirSync(path.join(destination, '0'))
       }
-      if (!fs.existsSync(path.join(dir, '0/cores')) && fs.existsSync(path.join(dir, 'cores'))) {
-        fs.renameSync(path.join(dir, 'cores'), path.join(dir, '0/cores'))
+      if (!fs.existsSync(path.join(destination, '0/cores')) && fs.existsSync(path.join(source, 'cores'))) {
+        fs.renameSync(path.join(source, 'cores'), path.join(destination, '0/cores'))
       }
-      if (!fs.existsSync(path.join(dir, '0/db')) && fs.existsSync(path.join(dir, 'db'))) {
-        fs.renameSync(path.join(dir, 'db'), path.join(dir, '0/db'))
+      if (!fs.existsSync(path.join(destination, '0/db')) && fs.existsSync(path.join(source, 'db'))) {
+        fs.renameSync(path.join(source, 'db'), path.join(destination, '0/db'))
       }
-      fs.renameSync(path.join(dir, 'CORESTORE'), path.join(dir, '0/CORESTORE'))
+      fs.renameSync(path.join(source, 'CORESTORE'), path.join(destination, '0/CORESTORE'))
       p.create({ name: null, id: 0 })
     }
 
