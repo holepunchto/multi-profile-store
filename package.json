@@ -1,5 +1,5 @@
 {
-  "name": "multi-identity-store",
+  "name": "multi-profile-store",
   "version": "1.0.1",
   "description": "Manage multiple corestores easily in a multi profile setup",
   "main": "index.js",
