@@ -10,7 +10,7 @@ Note that all io is sync for simplicity.
 
 ## Usage
 
-``` js
+```js
 const MultiProfileStore = require('multi-profile-store')
 
 // open one

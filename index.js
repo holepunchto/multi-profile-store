@@ -3,11 +3,11 @@ const path = require('path')
 const { isWindows } = require('which-runtime')
 
 module.exports = class MultiProfileStore {
-  constructor (dir, config) {
+  constructor(dir, config) {
     this.directory = dir
     this.version = config.version
 
-    this._profiles = config.profiles.map(p => {
+    this._profiles = config.profiles.map((p) => {
       return {
         id: p.id,
         name: p.name,
@@ -17,7 +17,7 @@ module.exports = class MultiProfileStore {
       }
     })
 
-    this._gc = config.gc.map(p => {
+    this._gc = config.gc.map((p) => {
       return {
         id: p.id,
         name: p.name,
@@ -28,10 +28,10 @@ module.exports = class MultiProfileStore {
     })
   }
 
-  sync () {
+  sync() {
     const data = {
       version: this.version,
-      profiles: this._profiles.map(p => {
+      profiles: this._profiles.map((p) => {
         return {
           id: p.id,
           name: p.name,
@@ -39,7 +39,7 @@ module.exports = class MultiProfileStore {
           created: p.created
         }
       }),
-      gc: this._gc.map(p => {
+      gc: this._gc.map((p) => {
         return {
           id: p.id,
           name: p.name,
@@ -59,11 +59,14 @@ module.exports = class MultiProfileStore {
     }
 
     try {
-      fs.renameSync(path.join(this.directory, 'profiles-next.json'), path.join(this.directory, 'profiles.json'))
+      fs.renameSync(
+        path.join(this.directory, 'profiles-next.json'),
+        path.join(this.directory, 'profiles.json')
+      )
     } catch {}
   }
 
-  gc ({ delay = 0 } = {}) {
+  gc({ delay = 0 } = {}) {
     for (let i = 0; i < this._gc.length; i++) {
       const p = this._gc[i]
       if (delay && p.removed + delay > Date.now()) continue
@@ -75,14 +78,14 @@ module.exports = class MultiProfileStore {
     }
   }
 
-  exists ({ id }) {
+  exists({ id }) {
     for (const p of this._profiles) {
       if (p.id === id) return true
     }
     return false
   }
 
-  update ({ id, active = true }) {
+  update({ id, active = true }) {
     for (const p of this._profiles) {
       if (p.id === id) {
         if (active) this._markAllInactive()
@@ -95,13 +98,13 @@ module.exports = class MultiProfileStore {
     return null
   }
 
-  _markAllInactive () {
+  _markAllInactive() {
     for (const p of this._profiles) {
       p.active = false
     }
   }
 
-  _next () {
+  _next() {
     let id = 0
 
     for (const p of this._profiles) {
@@ -115,7 +118,7 @@ module.exports = class MultiProfileStore {
     return id
   }
 
-  create ({ active = true, id = this._next(), name = null, created = Date.now() } = {}) {
+  create({ active = true, id = this._next(), name = null, created = Date.now() } = {}) {
     if (this.exists({ id })) return null
 
     const p = {
@@ -132,7 +135,7 @@ module.exports = class MultiProfileStore {
     return p
   }
 
-  remove ({ id, removed = Date.now() }) {
+  remove({ id, removed = Date.now() }) {
     for (let i = 0; i < this._profiles.length; i++) {
       const p = this._profiles[i]
 
@@ -153,25 +156,26 @@ module.exports = class MultiProfileStore {
     return false
   }
 
-  list () {
+  list() {
     return this._profiles
   }
 
-  active () {
+  active() {
     for (const profile of this._profiles) {
       if (profile.active) return profile
     }
     return null
   }
 
-  static open (dir) {
+  static open(dir) {
     let config = null
 
     try {
       config = JSON.parse(fs.readFileSync(path.join(dir, 'profiles.json'), 'utf-8'))
     } catch {}
 
-    if (!config) { // windows
+    if (!config) {
+      // windows
       try {
         config = JSON.parse(fs.readFileSync(path.join(dir, 'profiles-next.json'), 'utf-8'))
       } catch {}
@@ -188,11 +192,14 @@ module.exports = class MultiProfileStore {
     return new MultiProfileStore(dir, config)
   }
 
-  static migrate (dir) {
+  static migrate(dir) {
     const p = MultiProfileStore.open(dir)
     if (p.active()) return p
 
-    if (fs.existsSync(path.join(dir, 'CORESTORE')) && !fs.existsSync(path.join(dir, '0/CORESTORE'))) {
+    if (
+      fs.existsSync(path.join(dir, 'CORESTORE')) &&
+      !fs.existsSync(path.join(dir, '0/CORESTORE'))
+    ) {
       if (!fs.existsSync(path.join(dir, '0'))) {
         fs.mkdirSync(path.join(dir, '0'))
       }
