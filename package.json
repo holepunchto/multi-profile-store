@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "brittle": "^3.19.0",
+    "corestore": "^7.5.0",
     "prettier": "^3.6.2",
     "prettier-config-holepunch": "^2.0.0"
   },
