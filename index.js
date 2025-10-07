@@ -2,8 +2,6 @@ const fs = require('fs')
 const path = require('path')
 const { isWindows } = require('which-runtime')
 
-const LATEST_VERSION = 1
-
 module.exports = class MultiProfileStore {
   constructor(dir, config) {
     this.directory = dir
@@ -169,7 +167,7 @@ module.exports = class MultiProfileStore {
     return null
   }
 
-  static open(dir, { version = LATEST_VERSION } = {}) {
+  static open(dir) {
     let config = null
 
     try {
@@ -185,8 +183,8 @@ module.exports = class MultiProfileStore {
 
     if (!config) config = {}
 
-    if (config.version === undefined) config.version = version
-    if (!(config.version <= LATEST_VERSION)) throw new Error('Unknown version: ' + config.version)
+    if (config.version === undefined) config.version = 1
+    if (!(config.version <= 1)) throw new Error('Unknown version: ' + config.version)
 
     if (!config.profiles) config.profiles = []
     if (!config.gc) config.gc = []
@@ -195,24 +193,24 @@ module.exports = class MultiProfileStore {
   }
 
   static migrate(dir) {
-    const p = MultiProfileStore.open(dir, { version: 0 })
+    const p = MultiProfileStore.open(dir)
     if (p.active()) return p
 
-    const dst = path.join(dir, '0')
-
-    if (fs.existsSync(path.join(dir, 'CORESTORE')) && p.version === 0) {
-      if (!fs.existsSync(dst)) {
-        fs.mkdirSync(dst)
+    if (
+      fs.existsSync(path.join(dir, 'CORESTORE')) &&
+      !fs.existsSync(path.join(dir, '0/CORESTORE'))
+    ) {
+      if (!fs.existsSync(path.join(dir, '0'))) {
+        fs.mkdirSync(path.join(dir, '0'))
       }
-      if (!fs.existsSync(path.join(dst, 'cores')) && fs.existsSync(path.join(dir, 'cores'))) {
-        fs.renameSync(path.join(dir, 'cores'), path.join(dst, 'cores'))
+      if (!fs.existsSync(path.join(dir, '0/cores')) && fs.existsSync(path.join(dir, 'cores'))) {
+        fs.renameSync(path.join(dir, 'cores'), path.join(dir, '0/cores'))
       }
-      if (!fs.existsSync(path.join(dst, 'db')) && fs.existsSync(path.join(dir, 'db'))) {
-        fs.renameSync(path.join(dir, 'db'), path.join(dst, 'db'))
+      if (!fs.existsSync(path.join(dir, '0/db')) && fs.existsSync(path.join(dir, 'db'))) {
+        fs.renameSync(path.join(dir, 'db'), path.join(dir, '0/db'))
       }
-      p.version = LATEST_VERSION
+      fs.renameSync(path.join(dir, 'CORESTORE'), path.join(dir, '0/CORESTORE'))
       p.create({ name: null, id: 0 })
-      fs.unlinkSync(path.join(dir, 'CORESTORE')) // technically this might not run but no big deal
     }
 
     return p
