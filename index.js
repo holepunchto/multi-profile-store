@@ -15,6 +15,7 @@ module.exports = class MultiProfileStore {
         name: p.name,
         active: !!p.active,
         created: p.created,
+        confirmed: p.confirmed === undefined ? true : !!p.confirmed,
         storage: path.join(dir, p.id + '')
       }
     })
@@ -38,7 +39,8 @@ module.exports = class MultiProfileStore {
           id: p.id,
           name: p.name,
           active: p.active,
-          created: p.created
+          created: p.created,
+          confirmed: p.confirmed
         }
       }),
       gc: this._gc.map((p) => {
@@ -100,6 +102,27 @@ module.exports = class MultiProfileStore {
     return null
   }
 
+  confirm({ id }) {
+    for (const p of this._profiles) {
+      if (p.id !== id) continue
+      if (!p.confirmed) {
+        p.confirmed = true
+        this.sync()
+      }
+      return p
+    }
+
+    return null
+  }
+
+  removeUnconfirmed() {
+    let removed = false
+    for (const p of this._profiles.slice()) {
+      if (!p.confirmed) removed = this.remove(p) || removed
+    }
+    return removed
+  }
+
   _markAllInactive() {
     for (const p of this._profiles) {
       p.active = false
@@ -120,7 +143,13 @@ module.exports = class MultiProfileStore {
     return id
   }
 
-  create({ active = true, id = this._next(), name = null, created = Date.now() } = {}) {
+  create({
+    active = true,
+    id = this._next(),
+    name = null,
+    created = Date.now(),
+    confirmed = false
+  } = {}) {
     if (this.exists({ id })) return null
 
     const p = {
@@ -128,6 +157,7 @@ module.exports = class MultiProfileStore {
       name,
       active,
       created,
+      confirmed,
       storage: path.join(this.directory, id + '')
     }
 
@@ -211,7 +241,7 @@ module.exports = class MultiProfileStore {
         fs.renameSync(path.join(dir, 'db'), path.join(dst, 'db'))
       }
       p.version = LATEST_VERSION
-      p.create({ name: null, id: 0 })
+      p.create({ name: null, id: 0, confirmed: true })
       fs.unlinkSync(path.join(dir, 'CORESTORE')) // technically this might not run but no big deal
     }
 
