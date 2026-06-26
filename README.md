@@ -19,7 +19,7 @@ const p = MultiProfileStore.open('./profiles')
 // if you might have made a single corestore first and want to move to this setup, use migrate
 const p = MultiProfileStore.migrate('./profiles')
 
-// active profile, ie { id, name, storage } or null
+// active profile, ie { id, name, storage, confirmed } or null
 p.active()
 
 // list all profiles
@@ -34,8 +34,15 @@ p.remove({ id })
 // update to be active or not
 p.update({ id, active: true })
 
-// create a new profile, optionally pass a name, returns { id, name, storage }
+// create a new profile, optionally pass a name, returns { id, name, storage, confirmed }
+// new profiles are provisional (confirmed: false) until you confirm them
 p.create({ name: 'test' })
+
+// mark a profile as fully set up so it survives removeUnconfirmed()
+p.confirm({ id })
+
+// move every provisional (never-confirmed) profile to the gc list.
+p.removeUnconfirmed()
 ```
 
 ## License
