@@ -1,6 +1,6 @@
 {
   "name": "multi-profile-store",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Manage multiple corestores easily in a multi profile setup",
   "main": "index.js",
   "files": [
