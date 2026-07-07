@@ -25,7 +25,7 @@ module.exports = class MultiProfileStore {
         name: p.name,
         created: p.created,
         removed: p.removed,
-        storage: path.join(dir, p.id)
+        storage: path.join(dir, p.id + '')
       }
     })
   }
